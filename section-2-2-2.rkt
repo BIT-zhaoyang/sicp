@@ -10,7 +10,14 @@
         ((not (pair? tree)) (* factor tree))
         (else (cons (scale-tree (car tree) factor)
                     (scale-tree (cdr tree) factor)))))
+(define (scale-tree-2 tree factor)
+  (map (lambda (sub-tree)
+         (if (pair? sub-tree)
+             (scale-tree-2 sub-tree factor)
+             (* sub-tree factor)))
+       tree))
 (scale-tree (list 1 (list 2 (list 3 4) 5) (list 6 7)) 10)
+(scale-tree-2 (list 1 (list 2 (list 3 4) 5) (list 6 7)) 10)
 
 #| ==== Exercise ==== |#
 (define (verbose-exercise number)
@@ -52,6 +59,61 @@
 (define a (list (list 1 2) (list 3 4)))
 (fringe a)
 (fringe (list a a))
+;; exercise 2.30
+(verbose-exercise "2.30")
+(define (square val) (* val val))
+(define (square-tree tree)
+  (map (lambda (sub-tree)
+         (if (pair? sub-tree)
+             (square-tree sub-tree)
+             (square sub-tree)))
+       tree))
+(define (square-tree-naive tree)
+  (cond ((null? tree) nil)
+        ((pair? tree)
+         (cons (square-tree-naive (car tree))
+               (square-tree-naive (cdr tree))))
+        (else (square tree))))
+(square-tree
+       (list 1
+             (list 2 (list 3 4) 5)
+             (list 6 7)))
+(square-tree-naive
+       (list 1
+             (list 2 (list 3 4) 5)
+             (list 6 7)))
+;; exercise 2.31
+(verbose-exercise "2.31")
+(display "The difference between 'tree-map' and the normal 'map' we used") (newline)
+(display "in exercise 2.30 is that, while using normal 'map', we are still") (newline)
+(display "doing low level operations, like determine if an element is pair") (newline)
+(display "inside the 'lambda'. With 'tree-map', our lambda can focus purely") (newline)
+(display "on the logic without been distracted by handling low level details.") (newline)
+(define (tree-map proc tree)
+  (map (lambda (sub-tree)
+         (if (pair? sub-tree)
+             (tree-map proc sub-tree)
+             (proc sub-tree)))
+       tree))
+(define (square-tree-abs tree)
+  (tree-map square tree))
+(square-tree-abs
+       (list 1
+             (list 2 (list 3 4) 5)
+             (list 6 7)))
+;; exercise 2.32
+(verbose-exercise "2.32")
+(define (subsets s)
+  (if (null? s)
+      (list nil)
+      (let ((rest (subsets (cdr s))))
+        (append rest (map (lambda (ele) (cons (car s) ele)) rest)))))
+(subsets (list 1 2 3))
+(display "Why this works? Notice that, in the 'let' definition, we are already doing") (newline)
+(display "recursion. The 'rest' represents all subsets formed without current '(car s)'") (newline)
+(display "element. Then, we create the returned result with 'rest'. In addition, we make") (newline)
+(display "a copy of 'rest', and prepend '(car s)' to each element, which is sub-sub-set, of") (newline)
+(display "the copied 'rest'. After this, we append this newly created subrest to returned result.")
 
 #| ==== Tests ==== |#
 (define t (cons (list 1 2) (list 3 4)))
